@@ -1,4 +1,4 @@
-bs4==0.0.1
+beautifulsoup4==4.8.2
 lxml==4.5.0
 prometheus_client==0.7.1
 requests==2.22.0
