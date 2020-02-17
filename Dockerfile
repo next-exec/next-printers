@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN apk del build-dev
 RUN apk add --no-cache libxml2 libxslt
 
-CMD ["python", "./printer.py"]
+CMD ["python", "./printer.py", "--daemon"]
