@@ -1,10 +1,17 @@
+from argparse import ArgumentParser
+from time import sleep
+
 from bs4 import BeautifulSoup
 from prometheus_client import Gauge, start_http_server
 from requests import get
-from time import sleep
-from urllib3 import disable_warnings, exceptions
+from urllib3 import disable_warnings
+from urllib3.exceptions import InsecureRequestWarning
 
-disable_warnings(exceptions.InsecureRequestWarning)
+parser = ArgumentParser(description='Poll and serve information about the Next House printers.')
+parser.add_argument('-d', '--daemon', action='store_true', help='Run as a daemon for serving printer information')
+args = parser.parse_args()
+
+disable_warnings(InsecureRequestWarning)
 
 printers = [
     ('justinbieber', '2e', Gauge('ink_level_2e', '2E Ink Level')),
@@ -17,8 +24,8 @@ printers = [
     ('page-fault', '5w', Gauge('ink_level_5w', '5W Ink Level'))
 ]
 
-start_http_server(8000)
-while True:
+
+def poll_printers():
     for p, wing, gauge in printers:
         name = '{} ({})'.format(p, wing)
         try:
@@ -36,4 +43,13 @@ while True:
             level = found.findAll(text=True)[0]
             gauge.set(int(str(level)[:-1]))
             print(name + ': Online, {} ink.'.format(level))
-    sleep(60)
+
+
+if args.daemon:
+    print('Running as daemon on port 8000')
+    start_http_server(8000)
+    while True:
+        poll_printers()
+        sleep(60)
+else:
+    poll_printers()
